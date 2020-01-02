@@ -1,15 +1,20 @@
 package cn.oomkiller.paxos4j.config;
 
+import cn.oomkiller.paxos4j.utils.YamlUtil;
+import java.util.List;
+
 public class ConfigLoader {
-  public void load() {
-    NodeInfo oMyNode;
-    if (parse_ipport(argv[1], oMyNode) != 0) {
+  public void load(String confFile) {
+    YamlUtil.loadAs(confFile, Config.class);
+
+    NodeInfo myNode;
+    if (parse_ipport(argv[1], myNode) != 0) {
       printf("parse myip:myport fail\n");
       return -1;
     }
 
-    NodeInfoList vecNodeInfoList;
-    if (parse_ipport_list(argv[2], vecNodeInfoList) != 0) {
+    List<NodeInfo> nodeInfoList;
+    if (parse_ipport_list(argv[2], nodeInfoList) != 0) {
       printf("parse ip/port list fail\n");
       return -1;
     }
@@ -23,7 +28,7 @@ public class ConfigLoader {
 
       //this groupcount means run paxos group count.
       //every paxos group is independent, there are no any communicate between any 2 paxos group.
-      oOptions.iGroupCount = 1;
+      oOptions.groupCount = 1;
 
       oOptions.oMyNode = m_oMyNode;
       oOptions.vecNodeInfoList = m_vecNodeList;
