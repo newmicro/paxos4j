@@ -1,9 +1,10 @@
 package cn.oomkiller.paxos4j.config;
 
 import cn.oomkiller.paxos4j.log.LogStorage;
+import lombok.Data;
+
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class Config {
@@ -30,9 +31,15 @@ public class Config {
       int syncInterval,
       boolean useMembership,
       NodeInfo myNode,
-      List<NodeInfo> nodeInfoList) {}
+      List<NodeInfo> nodeInfoList) {
+    this.logSync = logSync;
+  }
 
   public void init() {}
 
   public void checkConfig() {}
+
+  public boolean isValidNodeId(long nodeId) {
+    return true;
+  }
 }

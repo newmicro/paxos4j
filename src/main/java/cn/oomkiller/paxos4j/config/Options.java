@@ -25,10 +25,10 @@ public class Options {
     //If this flag is false, and the machine crashes, some recent
     //writes may be lost. Note that if it is just the process that
     //crashes (i.e., the machine does not reboot), no writes will be
-    //lost even if sync==false. Because of the data lost, we not guarantee consistence.
+    //lost even if logSync==false. Because of the data lost, we not guarantee consistence.
     //
     //Default is true.
-    private boolean sync = true;
+    private boolean logSync = true;
 
     //optional
     //Default is 0.

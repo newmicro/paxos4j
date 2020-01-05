@@ -73,7 +73,7 @@ public class PaxosNode implements Node {
   public void init(Options options) {
     checkOptions(options);
 
-    this.myNodeId = options.myNode.getNodeId();
+    this.myNodeId = options.getMyNode().getNodeId();
 
     // step1 init logstorage
     initLogStorage(options);
@@ -100,6 +100,13 @@ public class PaxosNode implements Node {
     //      assert(poGroup != nullptr);
     //      m_vecGroupList.push_back(poGroup);
     //    }
+    this.config = new Config(
+            this.logStorage,
+            options.isLogSync(),
+            options.getSyncInterval(),
+            options.isUseMembership(),
+            options.getMyNode(),
+            options.getNodeInfoList());
     this.communicate = new Communicate(this.config, this.network);
     this.instance = new Instance(this.config, this.communicate, this.logStorage);
 
