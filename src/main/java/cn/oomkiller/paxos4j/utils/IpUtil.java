@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class IpUtil {
-  private final static String DOT = ".";
+  private final static String DOT = "\\.";
 
   public final static long ipToLong(String ip) {
     String[] ipStrs = ip.split(DOT);

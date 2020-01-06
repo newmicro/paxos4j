@@ -113,7 +113,7 @@ public class PaxosNode implements Node {
     // step5 build batchpropose
     //    if (options.useBatchPropose)
     //    {
-    //      for (int groupIdx = 0; groupIdx < options.groupCount; groupIdx++)
+    //      for (int groupIdx = 0; groupIdx < options.getGroupCount(); groupIdx++)
     //      {
     //        ProposeBatch poProposeBatch = new ProposeBatch(groupIdx, this, &m_oNotifierPool);
     //        assert(poProposeBatch != nullptr);
@@ -150,53 +150,53 @@ public class PaxosNode implements Node {
   }
 
   private void initNetWork(Options options) {
-    if (options.network != null) {
-      this.network = options.network;
+    if (options.getNetwork() != null) {
+      this.network = options.getNetwork();
       log.info("OK, use user network");
       return;
     }
 
     this.network =
-        new DefaultNetwork(options.myNode.GetIP(), options.myNode.GetPort(), options.ioThreadCount);
+        new DefaultNetwork(options.getMyNode().getIp(), options.getMyNode().getPort(), options.getIoThreadCount());
 
     log.info("OK, use default network");
   }
 
   private void initLogStorage(Options options) {
-    if (options.logStorage != null) {
-      this.logStorage = options.logStorage;
+    if (options.getLogStorage() != null) {
+      this.logStorage = options.getLogStorage();
       log.info("OK, use user logstorage");
       return;
     }
 
-    if (StringUtils.isEmpty(options.logStoragePath)) {
+    if (StringUtils.isEmpty(options.getLogStoragePath())) {
       log.error("LogStorage Path is null");
       throw new IllegalArgumentException();
     }
 
-    this.logStorage = new FileLogStore(options.getLogDir());
-//    .init(options.logStoragePath, options.groupCount);
+    this.logStorage = new FileLogStore(options.getLogStoragePath());
+//    .init(options.getLogStoragePath(), options.getGroupCount());
     log.info("OK, use default logstorage");
   }
 
   private void checkOptions(Options options) {
-    if (options.logStorage == null && StringUtils.isEmpty(options.logStoragePath)) {
+    if (options.getLogStorage() == null && StringUtils.isEmpty(options.getLogStoragePath())) {
       log.error("no logpath and logstorage is null");
       throw new IllegalArgumentException();
     }
 
-    if (options.udpMaxSize > 64 * 1024) {
-      log.error("udp max size %zu is too large", options.udpMaxSize);
+    if (options.getUdpMaxSize() > 64 * 1024) {
+      log.error("udp max size %zu is too large", options.getUdpMaxSize());
       throw new IllegalArgumentException();
     }
 
-    if (options.groupCount > 200) {
-      log.error("group count %d is too large", options.groupCount);
+    if (options.getGroupCount() > 200) {
+      log.error("group count %d is too large", options.getGroupCount());
       throw new IllegalArgumentException();
     }
 
-    if (options.groupCount <= 0) {
-      log.error("group count %d is small than zero or equal to zero", options.groupCount);
+    if (options.getGroupCount() <= 0) {
+      log.error("group count %d is small than zero or equal to zero", options.getGroupCount());
       throw new IllegalArgumentException();
     }
   }

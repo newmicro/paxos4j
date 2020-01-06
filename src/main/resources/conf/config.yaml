@@ -1,15 +1,13 @@
 nodes:
-  - id: 1
-    host: localhost
+  - ip: 127.0.0.1
     port: 3333
-  - id: 2
-    host: localhost
+  - ip: 127.0.0.1
     port: 3334
-  - id: 3
-    host: localhost
+  - ip: 127.0.0.1
     port: 3335
 
-myid: 1
+myIp: 127.0.0.1
+myPort: 3333
 logSync: true
 syncInterval: 1000
 useMembership: false

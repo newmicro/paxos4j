@@ -1,41 +1,40 @@
 package cn.oomkiller.paxos4j.log;
 
 import cn.oomkiller.paxos4j.algorithm.Acceptor;
+import cn.oomkiller.paxos4j.message.AcceptorStateData;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class PaxosLog {
-    private LogStorage logStorage;
+  private LogStorage logStorage;
 
-    public void writeLog(long instanceId, byte[] value) {
-        AcceptorStateData oState;
-        oState.set_instanceid(llInstanceID);
-        oState.set_acceptedvalue(sValue);
-        oState.set_promiseid(0);
-        oState.set_promisenodeid(nullnode);
-        oState.set_acceptedid(0);
-        oState.set_acceptednodeid(nullnode);
+  public void writeLog(long instanceId, byte[] value) {
+    AcceptorStateData stateData =
+        AcceptorStateData.builder()
+            .instanceId(instanceId)
+            .acceptedValue(value)
+            .promiseId(0)
+            .promiseNodeId(0L)
+            .acceptedId(0)
+            .acceptedNodeId(0L)
+            .build();
 
-        int ret = writeState(oWriteOptions, iGroupIdx, llInstanceID, oState);
-        if (ret != 0)
-        {
-            PLG1Err("WriteState to db fail, groupidx %d instanceid %lu ret %d", iGroupIdx, llInstanceID, ret);
-            return ret;
-        }
-    }
+    writeState(instanceId, stateData);
+  }
 
-    public byte[] readLog(long instanceId) {
+  public byte[] readLog(long instanceId) {
+    return null;
+  }
 
-    }
+  public long getMaxInstanceIdFromLog() {
+    return 0L;
+  }
 
-    public long getMaxInstanceIdFromLog() {
-        return 0L;
-    }
+  public void writeState(long instanceId, AcceptorStateData stateData) {}
 
-    public void writeState(long instanceId, Acceptor.State state) {
-    }
+  public void writeState(long instanceId, Acceptor.State state) {}
 
-    public Acceptor.State readState(long instanceId) {
-        return null;
-    }
+  public Acceptor.State readState(long instanceId) {
+    return null;
+  }
 }

@@ -1,12 +1,9 @@
 package cn.oomkiller.paxos4j.message;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serializable;
+import lombok.Builder;
 
-@Getter
-@Setter
+@Builder
 public class AcceptorStateData implements Serializable {
     long instanceId ;
     long promiseId;

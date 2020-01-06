@@ -42,4 +42,16 @@ public class Config {
   public boolean isValidNodeId(long nodeId) {
     return true;
   }
+
+  public int getPrepareTimeoutMs() {
+    return 0;
+  }
+
+  public int getAcceptTimeoutMs() {
+    return 0;
+  }
+
+  public int getMajorityCount() {
+    return 0;
+  }
 }

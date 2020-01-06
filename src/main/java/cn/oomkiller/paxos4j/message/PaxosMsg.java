@@ -5,7 +5,6 @@ import lombok.*;
 
 @Builder
 @Data
-@NoArgsConstructor
 public class PaxosMsg extends MessageBody {
     private long proposalId;
     private long nodeId;
