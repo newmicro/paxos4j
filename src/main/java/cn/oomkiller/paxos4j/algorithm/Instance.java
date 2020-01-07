@@ -191,6 +191,10 @@ public class Instance {
 
   private void receiveMsgForLearner(PaxosMsg oPaxosMsg) {}
 
+  public void commitNewValue(byte[] value) {
+    proposer.newValue(value);
+  }
+
   /////////////////////
   public void addStateMachine(StateMachine stateMachine) {
     stateMachineManager.addStateMachine(stateMachine);

@@ -1,0 +1,14 @@
+nodes:
+  - ip: 127.0.0.1
+    port: 3333
+  - ip: 127.0.0.1
+    port: 3334
+  - ip: 127.0.0.1
+    port: 3335
+
+myIp: 127.0.0.1
+myPort: 3334
+logSync: true
+syncInterval: 1000
+logStoragePath: /home/wengcp/paxos_3334.log
+useMembership: false

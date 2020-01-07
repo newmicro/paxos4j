@@ -33,6 +33,10 @@ public class Config {
       NodeInfo myNode,
       List<NodeInfo> nodeInfoList) {
     this.logSync = logSync;
+    this.syncInterval = syncInterval;
+    this.useMembership = useMembership;
+    this.myNodeId = myNode.getNodeId();
+    this.nodeInfoList = nodeInfoList;
   }
 
   public void init() {}

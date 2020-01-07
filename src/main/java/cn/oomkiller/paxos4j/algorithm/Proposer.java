@@ -267,7 +267,7 @@ public class Proposer extends Base {
     private long highestOtherProposalId;
     private byte[] value;
 
-    private BallotNumber highestOtherPreAcceptBallot;
+    private BallotNumber highestOtherPreAcceptBallot = new BallotNumber();
 
     private Config config;
 

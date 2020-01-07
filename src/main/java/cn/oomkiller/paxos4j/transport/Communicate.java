@@ -6,12 +6,12 @@ import cn.oomkiller.paxos4j.message.Message;
 import cn.oomkiller.paxos4j.message.PaxosMsg;
 import cn.oomkiller.paxos4j.transport.network.Network;
 import cn.oomkiller.paxos4j.utils.IdUtil;
-import lombok.extern.slf4j.Slf4j;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Communicate implements MsgTransport {
@@ -22,8 +22,8 @@ public class Communicate implements MsgTransport {
   long udpMaxSize;
 
   public Communicate(Config config, Network network) {
-      this.config = config;
-      this.network = network;
+    this.config = config;
+    this.network = network;
   }
 
   private SocketAddress getSocketAddressFromNodeId(long nodeId) {
@@ -38,7 +38,11 @@ public class Communicate implements MsgTransport {
 
   @Override
   public void broadcastMessage(PaxosMsg paxosMsg) {
-    Set<Long> nodeIds = new HashSet<>(); // = config.getSystemVSM().getMembershipMap();
+    Set<Long> nodeIds =
+        new HashSet<>(
+            config.getNodeInfoList().stream()
+                .map(NodeInfo::getNodeId)
+                .collect(Collectors.toList()));
 
     for (long nodeId : nodeIds) {
       if (nodeId != myNodeID) {
