@@ -1,14 +1,18 @@
 package cn.oomkiller.paxos4j.log;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Slf4j
 public class FileLogStore implements LogStorage {
     private Path logDirPath;
 
     public FileLogStore(String logDir) {
         this.logDirPath = Paths.get(logDir);
+        System.out.println(this.logDirPath.toAbsolutePath().toString());
         if (!logDirPath.toFile().exists()) {
             try {
                 logDirPath.toFile().createNewFile();

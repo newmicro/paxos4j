@@ -203,7 +203,9 @@ public class PaxosNode implements Node {
 
   @Override
   public boolean propose(byte[] value) {
+    log.info("Propose " + new String(value));
     instance.commitNewValue(value);
+    log.info("Proposed");
     //    return m_vecGroupList[iGroupIdx]->GetCommitter()->NewValueGetID(sValue, llInstanceID,
     // poSMCtx);
     return false;

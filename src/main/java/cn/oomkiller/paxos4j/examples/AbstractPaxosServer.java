@@ -15,8 +15,8 @@ public class AbstractPaxosServer {
 
         int cnt = 0;
         while (cnt++ < 10) {
-            Thread.sleep(10*1000);
             node.propose(("Hello" + System.currentTimeMillis()).getBytes());
+            Thread.sleep(10*1000);
         }
     }
 

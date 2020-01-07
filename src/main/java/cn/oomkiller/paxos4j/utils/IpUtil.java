@@ -4,10 +4,11 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class IpUtil {
-  private final static String DOT = "\\.";
+  private final static String ESCAPE_DOT = "\\.";
+  private final static String DOT = ".";
 
   public final static long ipToLong(String ip) {
-    String[] ipStrs = ip.split(DOT);
+    String[] ipStrs = ip.split(ESCAPE_DOT);
     if (ipStrs.length != 4) {
       throw new IllegalArgumentException("Wrong ip format: " + ip);
     }

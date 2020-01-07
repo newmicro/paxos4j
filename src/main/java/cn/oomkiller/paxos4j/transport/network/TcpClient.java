@@ -40,8 +40,8 @@ public class TcpClient extends Thread {
                 @Override
                 public void initChannel(SocketChannel ch) throws Exception {
                   ChannelPipeline p = ch.pipeline();
-                  p.addLast(new ProtocolEncoder());
                   p.addLast(new FrameEncoder());
+                  p.addLast(new ProtocolEncoder());
                   p.addLast(new TcpClientHandler(clientMap));
                 }
               });

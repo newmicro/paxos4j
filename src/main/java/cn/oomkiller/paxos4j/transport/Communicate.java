@@ -6,19 +6,20 @@ import cn.oomkiller.paxos4j.message.Message;
 import cn.oomkiller.paxos4j.message.PaxosMsg;
 import cn.oomkiller.paxos4j.transport.network.Network;
 import cn.oomkiller.paxos4j.utils.IdUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Communicate implements MsgTransport {
   private Config config;
   private Network network;
 
-  long myNodeID;
+  long myNodeId;
   long udpMaxSize;
 
   public Communicate(Config config, Network network) {
@@ -45,7 +46,7 @@ public class Communicate implements MsgTransport {
                 .collect(Collectors.toList()));
 
     for (long nodeId : nodeIds) {
-      if (nodeId != myNodeID) {
+      if (nodeId != myNodeId) {
         Message<PaxosMsg> message = new Message<>(IdUtil.nextId(), paxosMsg);
         network.sendMessageTCP(getSocketAddressFromNodeId(nodeId), message);
       }
