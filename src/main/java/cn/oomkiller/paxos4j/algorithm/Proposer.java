@@ -87,7 +87,7 @@ public class Proposer extends Base {
   }
 
   // Prepare阶段
-  void prepare(boolean needNewBallot) {
+  public void prepare(boolean needNewBallot) {
     exitAccept();
     isPreparing = true;
     canSkipPrepare = false;
@@ -117,7 +117,7 @@ public class Proposer extends Base {
     msgTransport.broadcastMessage(paxosMsg);
   }
 
-  void onPrepareReply(PaxosMsg paxosMsg) {
+  public void onPrepareReply(PaxosMsg paxosMsg) {
     if (!isPreparing) {
       return;
     }
@@ -158,7 +158,7 @@ public class Proposer extends Base {
     }
   }
 
-  void onExpiredPrepareReply(PaxosMsg paxosMsg) {
+  public void onExpiredPrepareReply(PaxosMsg paxosMsg) {
     if (paxosMsg.getRejectByPromiseId() != 0L) {
       wasRejectBySomeone = true;
       proposerState.setOtherProposalId(paxosMsg.getRejectByPromiseId());
@@ -175,7 +175,7 @@ public class Proposer extends Base {
     prepare(wasRejectBySomeone);
   }
 
-  void accept() {
+  public void accept() {
     exitPrepare();
     isAccepting = true;
 
@@ -194,7 +194,7 @@ public class Proposer extends Base {
 //    instance.onReceivePaxosMsg(paxosMsg, false);
   }
 
-  void onAcceptReply(PaxosMsg paxosMsg) {
+  public void onAcceptReply(PaxosMsg paxosMsg) {
     if (!isAccepting) {
       return;
     }
@@ -221,14 +221,14 @@ public class Proposer extends Base {
     }
   }
 
-  void onExpiredAcceptReply(PaxosMsg paxosMsg) {
+  public void onExpiredAcceptReply(PaxosMsg paxosMsg) {
     if (paxosMsg.getRejectByPromiseId() != 0L) {
       wasRejectBySomeone = true;
       proposerState.setOtherProposalId(paxosMsg.getRejectByPromiseId());
     }
   }
 
-  void onAcceptTimeout() {
+  public void onAcceptTimeout() {
     // 本轮提案已经选举结束，不再执行任何操作
     if (getInstanceId() != timeoutInstanceId) {
       return;
@@ -238,21 +238,21 @@ public class Proposer extends Base {
     prepare(wasRejectBySomeone);
   }
 
-  void exitPrepare() {
+  private void exitPrepare() {
     if (isPreparing) {
       isPreparing = false;
       ioLoop.removeTimer(prepareTimerId);
     }
   }
 
-  void exitAccept() {
+  private void exitAccept() {
     if (isAccepting) {
       isAccepting = false;
       ioLoop.removeTimer(acceptTimerId);
     }
   }
 
-  void cancelSkipPrepare() {
+  private void cancelSkipPrepare() {
     canSkipPrepare = false;
   }
 

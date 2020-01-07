@@ -16,12 +16,16 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TcpServer extends Thread {
+    private final String ip;
+    private final int port;
 
     private final ServerBootstrap serverBootstrap = new ServerBootstrap();
     private MessageHandler handler;
     private boolean isEnd;
 
     public TcpServer(String ip, int port, int ioThreadCount) {
+        this.ip = ip;
+        this.port = port;
     }
 
     public void setMessageHandler(MessageHandler handler) {
@@ -50,7 +54,7 @@ public class TcpServer extends Thread {
                     });
 
             // Start the server.
-            serverBootstrap.bind(8080).sync();
+            serverBootstrap.bind(ip, port).sync();
 
             // Wait until the server socket is closed.
             while(true) {

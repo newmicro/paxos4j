@@ -144,6 +144,9 @@ public class Options {
         .nodeInfoList(conf.nodes.stream().map(Options::toNodeInfo).collect(Collectors.toList()))
         .logSync(conf.logSync)
         .syncInterval(conf.syncInterval)
+        .logStoragePath(conf.logStoragePath)
+        .groupCount(1)
+        .ioThreadCount(1)
         .useMembership(conf.useMembership)
         .largeValueMode(conf.largeValueMode)
         .useCheckpointReplayer(conf.useCheckpointReplayer)
@@ -163,6 +166,7 @@ public class Options {
     private List<NodePO> nodes;
     private boolean logSync;
     private int syncInterval;
+    private String logStoragePath;
     private boolean useMembership;
     private boolean largeValueMode;
     private boolean useCheckpointReplayer;

@@ -10,4 +10,5 @@ myIp: 127.0.0.1
 myPort: 3333
 logSync: true
 syncInterval: 1000
+logStoragePath: /home/wengcp/paxos_3333.log
 useMembership: false

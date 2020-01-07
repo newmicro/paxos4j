@@ -68,6 +68,7 @@ public class Acceptor extends Base {
   }
 
   void onAccept(PaxosMsg paxosMsg) {
+    log.info("OnAccept");
     PaxosMsg replyMsg =
         PaxosMsg.builder()
             .msgType(PaxosMsgType.AcceptReply)
@@ -95,8 +96,8 @@ public class Acceptor extends Base {
   @Getter
   @Setter
   public static class State {
-    private BallotNumber promiseBallot;
-    private BallotNumber acceptedBallot;
+    private BallotNumber promiseBallot = new BallotNumber();
+    private BallotNumber acceptedBallot = new BallotNumber();
     private byte[] acceptedValue;
 
     private Config config;
@@ -114,11 +115,12 @@ public class Acceptor extends Base {
 
     public long load() {
       long instanceId = paxosLog.getMaxInstanceIdFromLog();
-      Acceptor.State acceptorState = paxosLog.readState(instanceId);
-
-      promiseBallot = acceptorState.getPromiseBallot();
-      acceptedBallot = acceptorState.getAcceptedBallot();
-      acceptedValue = acceptorState.getAcceptedValue();
+      if (instanceId != 0L) {
+        Acceptor.State acceptorState = paxosLog.readState(instanceId);
+        promiseBallot = acceptorState.getPromiseBallot();
+        acceptedBallot = acceptorState.getAcceptedBallot();
+        acceptedValue = acceptorState.getAcceptedValue();
+      }
 
       return instanceId;
     }

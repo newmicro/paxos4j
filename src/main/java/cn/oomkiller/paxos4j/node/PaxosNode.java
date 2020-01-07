@@ -210,6 +210,6 @@ public class PaxosNode implements Node {
 
   @Override
   public long getMyNodeId() {
-    return 0;
+    return this.myNodeId;
   }
 }

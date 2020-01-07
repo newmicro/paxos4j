@@ -1,14 +1,15 @@
 package cn.oomkiller.paxos4j.algorithm;
 
 import cn.oomkiller.paxos4j.config.Config;
+import java.util.HashSet;
 import java.util.Set;
 
 public class MsgCounter {
     private Config config;
 
-    private Set<Long> receiveMsgNodeIds;
-    private Set<Long> rejectMsgNodeIds;
-    private Set<Long> promiseOrAcceptMsgNodeIds;
+    private Set<Long> receiveMsgNodeIds = new HashSet<>();
+    private Set<Long> rejectMsgNodeIds = new HashSet<>();
+    private Set<Long> promiseOrAcceptMsgNodeIds = new HashSet<>();
 
     public MsgCounter(Config config) {
         this.config = config;

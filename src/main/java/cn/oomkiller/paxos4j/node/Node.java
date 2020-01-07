@@ -7,7 +7,6 @@ public interface Node {
 
     void stopNode();
 
-    //Base function.
     boolean propose(byte[] value);
 
     long getMyNodeId();
