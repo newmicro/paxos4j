@@ -25,6 +25,7 @@ public class Communicate implements MsgTransport {
   public Communicate(Config config, Network network) {
     this.config = config;
     this.network = network;
+    this.myNodeId = config.getMyNodeId();
   }
 
   private SocketAddress getSocketAddressFromNodeId(long nodeId) {

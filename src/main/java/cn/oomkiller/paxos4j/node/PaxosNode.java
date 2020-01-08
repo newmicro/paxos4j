@@ -23,19 +23,12 @@ public class PaxosNode implements Node {
   private Config config;
   private Instance instance;
 
-  //  public PaxosNode() {
-  ////    this.logStorage = new FileLogStore(options.getLogDir());
-  ////    this.messageHandler = new DefaultMessageHandler(instanceMap);
-  ////    this.network = new DefaultNetwork(options.getIp(), options.getPort(),
-  // options.getIoThreadCount(), messageHandler);
-  ////    this.communicate = new Communicate(this.config, this.network);
-  ////    this.instance = new Instance(this.config, this.communicate, this.logStorage);
-  ////    this.instanceMap.put(myNodeId, instance);
-  //  }
+  public PaxosNode(Options options) {
+    init(options);
+  }
 
   @Override
-  public void runNode(Options options) {
-    init(options);
+  public void runNode() {
     // step1 set node to network
     // very important, let network on recieve callback can work.
     network.setMessageHandler(new DefaultMessageHandler(this.instance));
@@ -100,7 +93,8 @@ public class PaxosNode implements Node {
     //      assert(poGroup != nullptr);
     //      m_vecGroupList.push_back(poGroup);
     //    }
-    this.config = new Config(
+    this.config =
+        new Config(
             this.logStorage,
             options.isLogSync(),
             options.getSyncInterval(),
@@ -157,7 +151,8 @@ public class PaxosNode implements Node {
     }
 
     this.network =
-        new DefaultNetwork(options.getMyNode().getIp(), options.getMyNode().getPort(), options.getIoThreadCount());
+        new DefaultNetwork(
+            options.getMyNode().getIp(), options.getMyNode().getPort(), options.getIoThreadCount());
 
     log.info("OK, use default network");
   }
@@ -175,7 +170,7 @@ public class PaxosNode implements Node {
     }
 
     this.logStorage = new FileLogStore(options.getLogStoragePath());
-//    .init(options.getLogStoragePath(), options.getGroupCount());
+    //    .init(options.getLogStoragePath(), options.getGroupCount());
     log.info("OK, use default logstorage");
   }
 
@@ -202,7 +197,7 @@ public class PaxosNode implements Node {
   }
 
   @Override
-  public boolean propose(byte[] value) {
+  public boolean commitNewValue(byte[] value) {
     log.info("Propose " + new String(value));
     instance.commitNewValue(value);
     log.info("Proposed");

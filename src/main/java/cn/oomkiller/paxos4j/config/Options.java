@@ -101,7 +101,7 @@ public class Options {
   private List<GroupSMInfo> vecGroupSMInfoList;
 
   // optional
-  // If use this mode, that means you propose large value(maybe large than 5M means large) much
+  // If use this mode, that means you commitNewValue large value(maybe large than 5M means large) much
   // more.
   // Large value means long latency, long timeout, this mode will fit it.
   // Default is false

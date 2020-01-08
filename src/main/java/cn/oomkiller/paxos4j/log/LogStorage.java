@@ -8,7 +8,7 @@ public interface LogStorage {
 
     void put(long instanceId, byte[] value);
 
-    void del(long instanceId);
+    void delete(long instanceId);
 
     long getMaxInstanceId();
 

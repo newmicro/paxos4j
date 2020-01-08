@@ -1,18 +1,19 @@
 package cn.oomkiller.paxos4j.transport.network;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import java.net.SocketAddress;
+import java.util.concurrent.ConcurrentMap;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.SocketAddress;
-import java.util.Map;
-
 @Slf4j
+@Sharable
 public class TcpClientHandler extends ChannelInboundHandlerAdapter {
-  private final Map<SocketAddress, Channel> clientMap;
+  private final ConcurrentMap<SocketAddress, Channel> clientMap;
 
-  public TcpClientHandler(Map<SocketAddress, Channel> clientMap) {
+  public TcpClientHandler(ConcurrentMap<SocketAddress, Channel> clientMap) {
     this.clientMap = clientMap;
   }
 

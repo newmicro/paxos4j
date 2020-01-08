@@ -13,7 +13,6 @@ public class Learner extends Base {
                    MsgTransport msgTransport,
                    Acceptor acceptor,
                    LogStorage poLogStorage,
-                   IOLoop ioLoop,
                    StateMachine stateMachine) {
         super(config, msgTransport);
     }

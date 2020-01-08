@@ -38,6 +38,7 @@ public class Acceptor extends Base {
   }
 
   void onPrepare(PaxosMsg paxosMsg) {
+    log.info("OnPrepare: " + paxosMsg);
     PaxosMsg replyMsg =
         PaxosMsg.builder()
             .msgType(PaxosMsgType.PrepareReply)
@@ -68,7 +69,7 @@ public class Acceptor extends Base {
   }
 
   void onAccept(PaxosMsg paxosMsg) {
-    log.info("OnAccept");
+    log.info("OnAccept " + paxosMsg);
     PaxosMsg replyMsg =
         PaxosMsg.builder()
             .msgType(PaxosMsgType.AcceptReply)

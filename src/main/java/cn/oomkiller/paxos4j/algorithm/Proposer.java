@@ -15,7 +15,7 @@ public class Proposer extends Base {
   boolean isPreparing;
   boolean isAccepting;
 
-  IOLoop ioLoop;
+//  IOLoop ioLoop;
 
   int prepareTimerId;
   int lastPrepareTimeoutMs;
@@ -27,12 +27,12 @@ public class Proposer extends Base {
   boolean wasRejectBySomeone;
 
   public Proposer(
-      Config config, MsgTransport msgTransport, Instance instance, Learner learner, IOLoop ioLoop) {
+      Config config, MsgTransport msgTransport, Instance instance, Learner learner) {
     super(config, msgTransport);
     this.proposerState = new Proposer.State(config);
     this.msgCounter = new MsgCounter(config);
     this.learner = learner;
-    this.ioLoop = ioLoop;
+//    this.ioLoop = ioLoop;
 
     isPreparing = false;
     isAccepting = false;
@@ -67,7 +67,7 @@ public class Proposer extends Base {
     return isPreparing || isAccepting;
   }
 
-  public void newValue(byte[] value) {
+  public void propose(byte[] value) {
     if (proposerState.getValue() == null) {
       proposerState.setValue(value);
     }
@@ -118,6 +118,7 @@ public class Proposer extends Base {
   }
 
   public void onPrepareReply(PaxosMsg paxosMsg) {
+    log.info("OnPrepareReply: " + paxosMsg);
     if (!isPreparing) {
       return;
     }
@@ -195,6 +196,7 @@ public class Proposer extends Base {
   }
 
   public void onAcceptReply(PaxosMsg paxosMsg) {
+    log.info("OnAcceptReply: " + paxosMsg);
     if (!isAccepting) {
       return;
     }
@@ -241,14 +243,14 @@ public class Proposer extends Base {
   private void exitPrepare() {
     if (isPreparing) {
       isPreparing = false;
-      ioLoop.removeTimer(prepareTimerId);
+//      ioLoop.removeTimer(prepareTimerId);
     }
   }
 
   private void exitAccept() {
     if (isAccepting) {
       isAccepting = false;
-      ioLoop.removeTimer(acceptTimerId);
+//      ioLoop.removeTimer(acceptTimerId);
     }
   }
 

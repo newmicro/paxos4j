@@ -16,73 +16,75 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TcpServer extends Thread {
-    private final String ip;
-    private final int port;
+  private final String ip;
+  private final int port;
 
-    private final ServerBootstrap serverBootstrap = new ServerBootstrap();
-    private MessageHandler handler;
-    private boolean isEnd;
+  private final ServerBootstrap serverBootstrap = new ServerBootstrap();
+  private MessageHandler messageHandler;
+  private boolean isEnd;
 
-    public TcpServer(String ip, int port, int ioThreadCount) {
-        this.ip = ip;
-        this.port = port;
-    }
+  public TcpServer(String ip, int port, int ioThreadCount) {
+    this.ip = ip;
+    this.port = port;
+  }
 
-    public void setMessageHandler(MessageHandler handler) {
-        this.handler = handler;
-    }
+  public void setMessageHandler(MessageHandler handler) {
+    this.messageHandler = handler;
+  }
 
-    @Override
-    public void run() {
-        // Configure the server.
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        final TcpServerHandler serverHandler = new TcpServerHandler(handler);
-        try {
-            serverBootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 100)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        public void initChannel(SocketChannel ch) throws Exception {
-                            ChannelPipeline p = ch.pipeline();
-                            p.addLast(new FrameDecoder());
-                            p.addLast(new ProtocolDecoder());
-                            p.addLast(serverHandler);
-                        }
-                    });
-
-            // Start the server.
-            serverBootstrap.bind(ip, port).sync();
-
-            // Wait until the server socket is closed.
-            while(true) {
-                if (isEnd) {
-                    return;
+  @Override
+  public void run() {
+    // Configure the server.
+    EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+    EventLoopGroup workerGroup = new NioEventLoopGroup();
+    final TcpServerHandler serverHandler = new TcpServerHandler(messageHandler);
+    try {
+      serverBootstrap
+          .group(bossGroup, workerGroup)
+          .channel(NioServerSocketChannel.class)
+          .option(ChannelOption.SO_BACKLOG, 100)
+          .handler(new LoggingHandler(LogLevel.WARN))
+          .childHandler(
+              new ChannelInitializer<SocketChannel>() {
+                @Override
+                public void initChannel(SocketChannel ch) throws Exception {
+                  ChannelPipeline p = ch.pipeline();
+                  p.addLast(new FrameDecoder());
+                  p.addLast(new ProtocolDecoder());
+                  p.addLast(serverHandler);
                 }
+              });
 
-                try {
-                    Thread.sleep(1 * 1000);
-                } catch (InterruptedException e) {
-                    // log.debug(String.format("Interrupted because of: %s"), e);
-                }
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            // Shut down all event loops to terminate all threads.
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+      // Start the server.
+      serverBootstrap.bind(ip, port).sync();
+
+      // Wait until the server socket is closed.
+      while (true) {
+        if (isEnd) {
+          return;
         }
-    }
 
-    public void end() {
-        isEnd = true;
         try {
-            join();
+          Thread.sleep(1 * 1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+          // log.debug(String.format("Interrupted because of: %s"), e);
         }
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } finally {
+      // Shut down all event loops to terminate all threads.
+      bossGroup.shutdownGracefully();
+      workerGroup.shutdownGracefully();
     }
+  }
+
+  public void end() {
+    isEnd = true;
+    try {
+      join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
 }

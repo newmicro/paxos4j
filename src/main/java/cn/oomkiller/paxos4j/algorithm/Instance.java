@@ -20,17 +20,17 @@ public class Instance {
   private Acceptor acceptor;
   private Learner learner;
   private StateMachineManager stateMachineManager;
-  private IOLoop ioLoop;
+//  private IOLoop ioLoop;
   private PaxosLog paxosLog;
   private boolean started;
 
   public Instance(Config config, MsgTransport msgTransport, LogStorage logStorage) {
     this.config = config;
 //    this.msgTransport = msgTransport;
-    this.ioLoop = new IOLoop(config, this);
+//    this.ioLoop = new IOLoop(config, this);
     this.acceptor = new Acceptor(config, msgTransport, logStorage);
-    this.learner = new Learner(config, msgTransport, acceptor, logStorage, ioLoop, (StateMachine) stateMachineManager);
-    this.proposer = new Proposer(config, msgTransport, this, learner, ioLoop);
+    this.learner = new Learner(config, msgTransport, acceptor, logStorage, (StateMachine) stateMachineManager);
+    this.proposer = new Proposer(config, msgTransport, this, learner);
     this.paxosLog = new PaxosLog(logStorage);
     this.started = false;
   }
@@ -39,7 +39,7 @@ public class Instance {
     // Must init acceptor first, because the max instanceid is record in acceptor state.
     acceptor.init();
 
-    log.info("Acceptor.OK, Log.InstanceID %lu", acceptor.getInstanceId());
+    log.info("Acceptor.OK, Log.InstanceId " + acceptor.getInstanceId());
 
     long nowInstanceId = acceptor.getInstanceId();
     learner.setInstanceId(nowInstanceId);
@@ -53,14 +53,14 @@ public class Instance {
     // start learner sender
     learner.startLearnerSender();
     // start ioloop
-    ioLoop.start();
+//    ioLoop.start();
 
     started = true;
   }
 
   public void stop() {
     if (started) {
-      ioLoop.stop();
+//      ioLoop.stop();
       learner.stop();
     }
   }
@@ -85,6 +85,7 @@ public class Instance {
   }
 
   public void onReceivePaxosMsg(final PaxosMsg paxosMsg, final boolean isRetry) {
+    log.info("OnReceivePaxosMsg: " + paxosMsg);
     if (paxosMsg.getMsgType() == PaxosMsgType.PrepareReply
         || paxosMsg.getMsgType() == PaxosMsgType.AcceptReply
         || paxosMsg.getMsgType() == PaxosMsgType.SendNewValue) {
@@ -156,7 +157,7 @@ public class Instance {
           //                    ioLoop.addRetryPaxosMsg(paxosMsg);
         } else {
           // retry msg not series, no use.
-          ioLoop.clearRetryQueue();
+//          ioLoop.clearRetryQueue();
         }
       }
     }
@@ -192,7 +193,7 @@ public class Instance {
   private void receiveMsgForLearner(PaxosMsg oPaxosMsg) {}
 
   public void commitNewValue(byte[] value) {
-    proposer.newValue(value);
+    proposer.propose(value);
   }
 
   /////////////////////

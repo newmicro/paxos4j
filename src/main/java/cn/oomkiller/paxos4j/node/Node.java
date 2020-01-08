@@ -1,13 +1,11 @@
 package cn.oomkiller.paxos4j.node;
 
-import cn.oomkiller.paxos4j.config.Options;
-
 public interface Node {
-    void runNode(Options options);
+    void runNode();
 
     void stopNode();
 
-    boolean propose(byte[] value);
+    boolean commitNewValue(byte[] value);
 
     long getMyNodeId();
 }

@@ -4,24 +4,28 @@ import cn.oomkiller.paxos4j.message.Message;
 import cn.oomkiller.paxos4j.transport.codec.FrameEncoder;
 import cn.oomkiller.paxos4j.transport.codec.ProtocolEncoder;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import java.net.SocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.net.SocketAddress;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
 @NoArgsConstructor
 public class TcpClient extends Thread {
   private final Bootstrap bootstrap = new Bootstrap();
   private boolean isEnd;
-  private Map<SocketAddress, Channel> clientMap = new ConcurrentHashMap<>();
+  private ConcurrentMap<SocketAddress, Channel> clientMap = new ConcurrentHashMap<>();
   private LinkedBlockingQueue<RoutedMessage> messageQueue = new LinkedBlockingQueue();
 
   public TcpClient(int ioThreadCount) {}

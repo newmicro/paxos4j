@@ -10,13 +10,13 @@ public class AbstractPaxosServer3 {
 
     public void runPaxos() throws IOException, InterruptedException {
         Options options = Options.load("conf/config3.yaml");
-        node = new PaxosNode();
-        node.runNode(options);
+        node = new PaxosNode(options);
+        node.runNode();
 
         int cnt = 0;
         while (true) {
             Thread.sleep(10*1000);
-            //node.propose(("Hello" + System.currentTimeMillis()).getBytes());
+            //node.commitNewValue(("Hello" + System.currentTimeMillis()).getBytes());
         }
     }
 
