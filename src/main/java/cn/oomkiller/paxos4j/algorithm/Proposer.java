@@ -6,20 +6,22 @@ import cn.oomkiller.paxos4j.message.PaxosMsg;
 import cn.oomkiller.paxos4j.transport.MsgTransport;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 @Slf4j
 public class Proposer extends Base {
-  private Proposer.State proposerState;
-  MsgCounter msgCounter;
-  Learner learner;
+  private final Proposer.State proposerState;
+  private final MsgCounter msgCounter;
+  private final Learner learner;
+  private final Timer timer = new Timer("ProposerTimer", true);
 
-  boolean isPreparing;
-  boolean isAccepting;
+  private boolean isPreparing;
+  private boolean isAccepting;
 
-//  IOLoop ioLoop;
-
-  int prepareTimerId;
+  private TimerTask prepareTimerTask;
   int lastPrepareTimeoutMs;
-  int acceptTimerId;
+  private TimerTask acceptTimerTask;
   int lastAcceptTimeoutMs;
   long timeoutInstanceId;
 
@@ -32,7 +34,6 @@ public class Proposer extends Base {
     this.proposerState = new Proposer.State(config);
     this.msgCounter = new MsgCounter(config);
     this.learner = learner;
-//    this.ioLoop = ioLoop;
 
     isPreparing = false;
     isAccepting = false;
@@ -111,10 +112,34 @@ public class Proposer extends Base {
     msgCounter.startNewRound();
 
     // Prepare超时定时器
-    // ddPrepareTimer();
+    addPrepareTimer();
 
     // 发送Prepare消息
     msgTransport.broadcastMessage(paxosMsg);
+  }
+
+  private void addPrepareTimer() {
+    addPrepareTimer(0L);
+  }
+
+  private void addPrepareTimer(final long timeoutMs) {
+    if (prepareTimerTask != null) {
+      prepareTimerTask.cancel();
+    }
+
+    prepareTimerTask = new TimerTask() {
+      @Override
+      public void run() {
+        onPrepareTimeout();
+      }
+    };
+
+    if (timeoutMs > 0L) {
+      timer.schedule(prepareTimerTask, timeoutMs);
+    }
+
+
+    timer.schedule(prepareTimerTask, timeoutMs);
   }
 
   public void onPrepareReply(PaxosMsg paxosMsg) {
