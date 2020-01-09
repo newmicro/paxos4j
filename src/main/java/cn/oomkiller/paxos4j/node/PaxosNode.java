@@ -99,6 +99,7 @@ public class PaxosNode implements Node {
             options.isLogSync(),
             options.getSyncInterval(),
             options.isUseMembership(),
+            options.isLargeValueMode(),
             options.getMyNode(),
             options.getNodeInfoList());
     this.communicate = new Communicate(this.config, this.network);

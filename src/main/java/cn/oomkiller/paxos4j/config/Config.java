@@ -1,16 +1,16 @@
 package cn.oomkiller.paxos4j.config;
 
 import cn.oomkiller.paxos4j.log.LogStorage;
-import lombok.Data;
-
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
 
 @Data
 public class Config {
   private boolean logSync;
   private int syncInterval;
   private boolean useMembership;
+  private boolean largeValueMode;
 
   private long myNodeId;
   private int nodeCount;
@@ -30,6 +30,7 @@ public class Config {
       boolean logSync,
       int syncInterval,
       boolean useMembership,
+      boolean largeValueMode,
       NodeInfo myNode,
       List<NodeInfo> nodeInfoList) {
     this.logSync = logSync;
@@ -37,6 +38,7 @@ public class Config {
     this.useMembership = useMembership;
     this.myNodeId = myNode.getNodeId();
     this.nodeInfoList = nodeInfoList;
+    this.largeValueMode = largeValueMode;
   }
 
   public void init() {}
@@ -47,15 +49,39 @@ public class Config {
     return true;
   }
 
-  public int getPrepareTimeoutMs() {
-    return 0;
+  public long getInitialPrepareTimeoutMs() {
+    if (largeValueMode) {
+      return 15000L;
+    } else {
+      return 2000L;
+    }
   }
 
-  public int getAcceptTimeoutMs() {
-    return 0;
+  public long getInitialAcceptTimeoutMs() {
+    if (largeValueMode) {
+      return 15000L;
+    } else {
+      return 1000L;
+    }
+  }
+
+  public long getMaxPrepareTimeoutMs() {
+    if (largeValueMode) {
+      return 90000L;
+    } else {
+      return 8000L;
+    }
+  }
+
+  public long getMaxAcceptTimeoutMs() {
+    if (largeValueMode) {
+      return 90000L;
+    } else {
+      return 8000L;
+    }
   }
 
   public int getMajorityCount() {
-    return 0;
+    return nodeInfoList.size() / 2 + 1;
   }
 }

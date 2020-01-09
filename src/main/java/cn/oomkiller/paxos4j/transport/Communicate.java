@@ -39,7 +39,7 @@ public class Communicate implements MsgTransport {
   }
 
   @Override
-  public void broadcastMessage(PaxosMsg paxosMsg) {
+  public void broadcastMessageWithoutCurrentNode(PaxosMsg paxosMsg) {
     Set<Long> nodeIds =
         new HashSet<>(
             config.getNodeInfoList().stream()
@@ -52,5 +52,17 @@ public class Communicate implements MsgTransport {
         network.sendMessageTCP(getSocketAddressFromNodeId(nodeId), message);
       }
     }
+  }
+
+  public void broadcastMessageAfterCurrentNode(PaxosMsg paxosMsg) {
+    Message<PaxosMsg> message = new Message<>(IdUtil.nextId(), paxosMsg);
+    network.sendMessageTCP(getSocketAddressFromNodeId(config.getMyNodeId()), message);
+    broadcastMessageWithoutCurrentNode(paxosMsg);
+  }
+
+  public void broadcastMessageBeforeCurrentNode(PaxosMsg paxosMsg) {
+    broadcastMessageWithoutCurrentNode(paxosMsg);
+    Message<PaxosMsg> message = new Message<>(IdUtil.nextId(), paxosMsg);
+    network.sendMessageTCP(getSocketAddressFromNodeId(config.getMyNodeId()), message);
   }
 }
