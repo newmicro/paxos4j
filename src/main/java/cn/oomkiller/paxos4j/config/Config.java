@@ -1,6 +1,7 @@
 package cn.oomkiller.paxos4j.config;
 
 import cn.oomkiller.paxos4j.log.LogStorage;
+import cn.oomkiller.paxos4j.utils.RandomUtil;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
@@ -49,6 +50,14 @@ public class Config {
     return true;
   }
 
+  public long getPrepareTimeoutMs() {
+    return 3000L;
+  }
+
+  public long getAcceptTimeoutMs() {
+    return 3000L;
+  }
+
   public long getInitialPrepareTimeoutMs() {
     if (largeValueMode) {
       return 15000L;
@@ -78,6 +87,22 @@ public class Config {
       return 90000L;
     } else {
       return 8000L;
+    }
+  }
+
+  public long getAskforLearnInterval() {
+    if (!amIFollower) {
+      if (largeValueMode) {
+        return 50000 + (RandomUtil.randomInt() % 10000);
+      } else {
+        return 2500 + (RandomUtil.randomInt() % 500);
+      }
+    } else {
+      if (largeValueMode) {
+        return 30000 + (RandomUtil.randomInt() % 15000);
+      } else {
+        return 2000 + (RandomUtil.randomInt() % 1000);
+      }
     }
   }
 

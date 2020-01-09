@@ -29,8 +29,8 @@ public class Instance {
 //    this.msgTransport = msgTransport;
 //    this.ioLoop = new IOLoop(config, this);
     this.acceptor = new Acceptor(config, msgTransport, logStorage);
-    this.learner = new Learner(config, msgTransport, acceptor, logStorage, (StateMachine) stateMachineManager);
-    this.proposer = new Proposer(config, msgTransport, this, learner);
+    this.learner = new Learner(config, msgTransport, acceptor, logStorage, stateMachineManager);
+    this.proposer = new Proposer(config, msgTransport, learner);
     this.paxosLog = new PaxosLog(logStorage);
     this.started = false;
   }
@@ -46,7 +46,7 @@ public class Instance {
     proposer.setInstanceId(nowInstanceId);
     proposer.setStartProposalId(acceptor.getAcceptorState().getPromiseBallot().getProposalId() + 1);
 
-    learner.resetAskforLearnNoop();
+    learner.resetAskForLearnNoop();
   }
 
   public void start() {

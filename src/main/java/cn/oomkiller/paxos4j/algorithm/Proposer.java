@@ -4,7 +4,7 @@ import cn.oomkiller.paxos4j.config.Config;
 import cn.oomkiller.paxos4j.message.PaxosMsg;
 import cn.oomkiller.paxos4j.message.PaxosMsgType;
 import cn.oomkiller.paxos4j.transport.MsgTransport;
-import java.util.Random;
+import cn.oomkiller.paxos4j.utils.RandomUtil;
 import java.util.Timer;
 import java.util.TimerTask;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +14,11 @@ public class Proposer extends Base {
   private final Proposer.State proposerState;
   private final MsgCounter msgCounter;
   private final Learner learner;
-  private final Timer timer = new Timer("ProposerTimer", true);
 
   private boolean isPreparing;
   private boolean isAccepting;
 
+  private final Timer timer = new Timer("ProposerTimer", true);
   private TimerTask prepareTimerTask;
   private long lastPrepareTimeoutMs;
   private TimerTask acceptTimerTask;
@@ -28,7 +28,7 @@ public class Proposer extends Base {
   boolean canSkipPrepare;
   boolean wasRejectBySomeone;
 
-  public Proposer(Config config, MsgTransport msgTransport, Instance instance, Learner learner) {
+  public Proposer(Config config, MsgTransport msgTransport, Learner learner) {
     super(config, msgTransport);
     this.proposerState = new Proposer.State(config);
     this.msgCounter = new MsgCounter(config);
@@ -40,12 +40,8 @@ public class Proposer extends Base {
 
     initForNewPaxosInstance();
 
-    //        m_iPrepareTimerID = 0;
-    //        m_iAcceptTimerID = 0;
-    //        m_llTimeoutInstanceID = 0;
-
-    lastPrepareTimeoutMs = config.getInitialPrepareTimeoutMs();
-    lastAcceptTimeoutMs = config.getInitialAcceptTimeoutMs();
+    lastPrepareTimeoutMs = config.getPrepareTimeoutMs();
+    lastAcceptTimeoutMs = config.getAcceptTimeoutMs();
 
     wasRejectBySomeone = false;
   }
@@ -72,8 +68,8 @@ public class Proposer extends Base {
       proposerState.setValue(value);
     }
 
-    //        lastPrepareTimeoutMs = START_PREPARE_TIMEOUTMS;
-    //        lastAcceptTimeoutMs = START_ACCEPT_TIMEOUTMS;
+    lastPrepareTimeoutMs = config.getInitialPrepareTimeoutMs();
+    lastAcceptTimeoutMs = config.getInitialAcceptTimeoutMs();
 
     // 如果允许跳过Prepare阶段 && 当前未被其他节点拒绝
     if (canSkipPrepare && !wasRejectBySomeone) {
@@ -159,7 +155,7 @@ public class Proposer extends Base {
       // 已收到超过半数的Reject回复消息或者所有节点已回复(这个判断并不需要)，重新进入Prepare阶段
       log.info("[Not Pass] wait 30ms and restart prepare");
       // 重置Prepare超时定时器，提前触发Prepare超时
-      addPrepareTimer(new Random().nextInt(30) + 10);
+      addPrepareTimer(RandomUtil.randomInt(30) + 10);
     }
   }
 
@@ -212,7 +208,7 @@ public class Proposer extends Base {
       exitAccept();
       learner.proposerSendSuccess(getInstanceId(), proposerState.getProposalId());
     } else if (msgCounter.isRejectedOnThisRound() || msgCounter.isAllReceiveOnThisRound()) {
-      addAcceptTimer(new Random().nextInt(30) + 10);
+      addAcceptTimer(RandomUtil.randomInt(30) + 10);
     }
   }
 
@@ -224,6 +220,7 @@ public class Proposer extends Base {
   }
 
   void onPrepareOrAcceptTimeout() {
+    log.info("onPrepareOrAcceptTimeout");
     // 本轮提案已经选举结束，不再执行任何操作
     if (getInstanceId() != timeoutInstanceId) {
       return;
@@ -241,7 +238,7 @@ public class Proposer extends Base {
 
   private void addPrepareTimer(final long timeoutMs) {
     lastPrepareTimeoutMs =
-        addTimer(acceptTimerTask, timeoutMs, lastAcceptTimeoutMs, config.getMaxAcceptTimeoutMs());
+        addTimer(acceptTimerTask, timeoutMs, lastPrepareTimeoutMs, config.getMaxPrepareTimeoutMs());
   }
 
   private void addAcceptTimer() {
