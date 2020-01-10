@@ -1,44 +1,52 @@
 package cn.oomkiller.paxos4j.log;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class FileLogStore implements LogStorage {
-  private Path logPath;
+public class FileLogStore implements LogStore {
+  private File logFile;
 
-  public FileLogStore(String logDir) {
-    this.logPath = Paths.get(logDir);
-    log.info(this.logPath.toAbsolutePath().toString());
+  public FileLogStore(String logStoragePath) {
+    Path logPath = Paths.get(logStoragePath);
+    logFile = logPath.toFile();
+    log.info(logPath.toAbsolutePath().toString());
     if (!logPath.toFile().exists()) {
       try {
         logPath.toFile().createNewFile();
       } catch (IOException e) {
-        e.printStackTrace();
+        log.error("Create paxos log file failed!", e);
       }
     }
   }
 
   @Override
-  public String getLogStorageDirPath() {
-    return this.logPath.toAbsolutePath().toString();
+  public String getLogStorePath() {
+    return logFile.toPath().toString();
   }
 
   @Override
   public byte[] get(long instanceId) {
+
     return new byte[0];
   }
 
   @Override
-  public void put(long instanceId, byte[] value) {}
+  public void put(long instanceId, byte[] value, boolean isSync) {
+    if (isSync) {
+
+    }
+  }
 
   @Override
   public void delete(long instanceId) {}
 
   @Override
   public long getMaxInstanceId() {
+
     return 0;
   }
 
@@ -51,5 +59,7 @@ public class FileLogStore implements LogStorage {
   }
 
   @Override
-  public void clearAllLog() {}
+  public void clearAllLog() {
+
+  }
 }

@@ -1,6 +1,6 @@
 package cn.oomkiller.paxos4j.config;
 
-import cn.oomkiller.paxos4j.log.LogStorage;
+import cn.oomkiller.paxos4j.log.LogStore;
 import cn.oomkiller.paxos4j.transport.network.Network;
 import cn.oomkiller.paxos4j.utils.YamlUtil;
 import java.io.IOException;
@@ -15,7 +15,7 @@ public class Options {
   // optional
   // User-specified paxoslog storage.
   // Default is null.
-  private LogStorage logStorage;
+  private LogStore logStore;
 
   // optional
   // If poLogStorage == nullptr, sLogStoragePath is required.

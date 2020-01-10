@@ -4,7 +4,7 @@ import cn.oomkiller.paxos4j.algorithm.Instance;
 import cn.oomkiller.paxos4j.config.Config;
 import cn.oomkiller.paxos4j.config.Options;
 import cn.oomkiller.paxos4j.log.FileLogStore;
-import cn.oomkiller.paxos4j.log.LogStorage;
+import cn.oomkiller.paxos4j.log.LogStore;
 import cn.oomkiller.paxos4j.transport.Communicate;
 import cn.oomkiller.paxos4j.transport.DefaultMessageHandler;
 import cn.oomkiller.paxos4j.transport.MsgTransport;
@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class PaxosNode implements Node {
-  private LogStorage logStorage;
+  private LogStore logStore;
   private Network network;
   private long myNodeId;
 
@@ -95,7 +95,7 @@ public class PaxosNode implements Node {
     //    }
     this.config =
         new Config(
-            this.logStorage,
+            this.logStore,
             options.isLogSync(),
             options.getSyncInterval(),
             options.isUseMembership(),
@@ -103,7 +103,7 @@ public class PaxosNode implements Node {
             options.getMyNode(),
             options.getNodeInfoList());
     this.communicate = new Communicate(this.config, this.network);
-    this.instance = new Instance(this.config, this.communicate, this.logStorage);
+    this.instance = new Instance(this.config, this.communicate, this.logStore);
 
     // step5 build batchpropose
     //    if (options.useBatchPropose)
@@ -159,24 +159,24 @@ public class PaxosNode implements Node {
   }
 
   private void initLogStorage(Options options) {
-    if (options.getLogStorage() != null) {
-      this.logStorage = options.getLogStorage();
+    if (options.getLogStore() != null) {
+      this.logStore = options.getLogStore();
       log.info("OK, use user logstorage");
       return;
     }
 
     if (StringUtils.isEmpty(options.getLogStoragePath())) {
-      log.error("LogStorage Path is null");
+      log.error("LogStore Path is null");
       throw new IllegalArgumentException();
     }
 
-    this.logStorage = new FileLogStore(options.getLogStoragePath());
+    this.logStore = new FileLogStore(options.getLogStoragePath());
     //    .init(options.getLogStoragePath(), options.getGroupCount());
     log.info("OK, use default logstorage");
   }
 
   private void checkOptions(Options options) {
-    if (options.getLogStorage() == null && StringUtils.isEmpty(options.getLogStoragePath())) {
+    if (options.getLogStore() == null && StringUtils.isEmpty(options.getLogStoragePath())) {
       log.error("no logpath and logstorage is null");
       throw new IllegalArgumentException();
     }

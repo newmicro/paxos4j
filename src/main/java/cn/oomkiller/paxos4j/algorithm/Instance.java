@@ -1,7 +1,7 @@
 package cn.oomkiller.paxos4j.algorithm;
 
 import cn.oomkiller.paxos4j.config.Config;
-import cn.oomkiller.paxos4j.log.LogStorage;
+import cn.oomkiller.paxos4j.log.LogStore;
 import cn.oomkiller.paxos4j.log.PaxosLog;
 import cn.oomkiller.paxos4j.message.PaxosMsg;
 import cn.oomkiller.paxos4j.message.PaxosMsgType;
@@ -9,6 +9,7 @@ import cn.oomkiller.paxos4j.statemachine.StateMachine;
 import cn.oomkiller.paxos4j.statemachine.StateMachineContext;
 import cn.oomkiller.paxos4j.statemachine.StateMachineManager;
 import cn.oomkiller.paxos4j.transport.MsgTransport;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -24,14 +25,14 @@ public class Instance {
   private PaxosLog paxosLog;
   private boolean started;
 
-  public Instance(Config config, MsgTransport msgTransport, LogStorage logStorage) {
+  public Instance(Config config, MsgTransport msgTransport, LogStore logStore) {
     this.config = config;
 //    this.msgTransport = msgTransport;
 //    this.ioLoop = new IOLoop(config, this);
-    this.acceptor = new Acceptor(config, msgTransport, logStorage);
-    this.learner = new Learner(config, msgTransport, acceptor, logStorage, stateMachineManager);
+    this.acceptor = new Acceptor(config, msgTransport, logStore);
+    this.learner = new Learner(config, msgTransport, acceptor, logStore, stateMachineManager);
     this.proposer = new Proposer(config, msgTransport, learner);
-    this.paxosLog = new PaxosLog(logStorage);
+    this.paxosLog = new PaxosLog(logStore);
     this.started = false;
   }
 
@@ -76,7 +77,12 @@ public class Instance {
       return null;
     }
 
-    Acceptor.State state = paxosLog.readState(instanceId);
+    Acceptor.StateData state = null;
+    try {
+      state = paxosLog.readState(instanceId);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     return state.getAcceptedValue();
   }
 

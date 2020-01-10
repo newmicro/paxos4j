@@ -5,9 +5,10 @@ import cn.oomkiller.paxos4j.message.PaxosMsg;
 import cn.oomkiller.paxos4j.message.PaxosMsgType;
 import cn.oomkiller.paxos4j.transport.MsgTransport;
 import cn.oomkiller.paxos4j.utils.RandomUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Timer;
 import java.util.TimerTask;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Proposer extends Base {
@@ -119,16 +120,9 @@ public class Proposer extends Base {
 
   public void onPrepareReply(PaxosMsg paxosMsg) {
     log.info("OnPrepareReply: " + paxosMsg);
-    if (!isPreparing) {
+    if (!shouldProcessMessage(paxosMsg, isPreparing)) {
       return;
     }
-
-    if (paxosMsg.getProposalId() != proposerState.getProposalId()) {
-      return;
-    }
-
-    // 已从node id节点获取数据
-    msgCounter.addReceive(paxosMsg.getNodeId());
 
     if (paxosMsg.getRejectByPromiseId() == 0) {
       // 接受该提案，并将该节点的promise id(承诺提案编号)、提案值更新到本地
@@ -186,15 +180,9 @@ public class Proposer extends Base {
 
   public void onAcceptReply(PaxosMsg paxosMsg) {
     log.info("OnAcceptReply: " + paxosMsg);
-    if (!isAccepting) {
+    if (!shouldProcessMessage(paxosMsg, isAccepting)) {
       return;
     }
-
-    if (paxosMsg.getProposalId() != proposerState.getProposalId()) {
-      return;
-    }
-
-    msgCounter.addReceive(paxosMsg.getNodeId());
 
     if (paxosMsg.getRejectByPromiseId() == 0) {
       msgCounter.addPromiseOrAccept(paxosMsg.getNodeId());
@@ -210,6 +198,19 @@ public class Proposer extends Base {
     } else if (msgCounter.isRejectedOnThisRound() || msgCounter.isAllReceiveOnThisRound()) {
       addAcceptTimer(RandomUtil.randomInt(30) + 10);
     }
+  }
+
+  private boolean shouldProcessMessage(PaxosMsg paxosMsg, boolean inPhase) {
+    if (!inPhase) {
+      return false;
+    }
+
+    if (paxosMsg.getProposalId() != proposerState.getProposalId()) {
+      return false;
+    }
+
+    msgCounter.addReceive(paxosMsg.getNodeId());
+    return true;
   }
 
   public void onExpiredAcceptReply(PaxosMsg paxosMsg) {

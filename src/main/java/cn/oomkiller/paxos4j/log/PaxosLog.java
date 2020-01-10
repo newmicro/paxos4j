@@ -1,40 +1,46 @@
 package cn.oomkiller.paxos4j.log;
 
 import cn.oomkiller.paxos4j.algorithm.Acceptor;
-import cn.oomkiller.paxos4j.message.AcceptorStateData;
+import java.io.IOException;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class PaxosLog {
-  private LogStorage logStorage;
+  private final LogStore logStore;
 
-  public void writeLog(long instanceId, byte[] value) {
-    AcceptorStateData stateData =
-        AcceptorStateData.builder()
+  public void writeLog(long instanceId, byte[] value, boolean isSync) throws IOException {
+    Acceptor.StateData stateData =
+        Acceptor.StateData.builder()
             .instanceId(instanceId)
             .acceptedValue(value)
             .promiseId(0)
-            .promiseNodeId(0L)
+            .promiseNodeId(0)
             .acceptedId(0)
-            .acceptedNodeId(0L)
+            .acceptedNodeId(0)
             .build();
 
-    writeState(instanceId, stateData);
+    writeState(instanceId, stateData, isSync);
   }
 
-  public byte[] readLog(long instanceId) {
-    return null;
+  public byte[] readLog(long instanceId) throws IOException {
+    Acceptor.StateData state = readState(instanceId);
+    return state.getAcceptedValue();
   }
 
   public long getMaxInstanceIdFromLog() {
     return 0L;
   }
 
-  public void writeState(long instanceId, AcceptorStateData stateData) {}
+  public void writeState(long instanceId, Acceptor.StateData state, boolean isSync)
+      throws IOException {
+    byte[] bytes = state.serializeToBytes();
+    logStore.put(instanceId, bytes, isSync);
+  }
 
-  public void writeState(long instanceId, Acceptor.State state) {}
+  public Acceptor.StateData readState(long instanceId) throws IOException {
+    byte[] bytes = logStore.get(instanceId);
+    Acceptor.StateData stateData = new Acceptor.StateData();
 
-  public Acceptor.State readState(long instanceId) {
-    return null;
+    return stateData.parseFromBytes(bytes);
   }
 }

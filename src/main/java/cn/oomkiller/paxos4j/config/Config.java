@@ -1,10 +1,11 @@
 package cn.oomkiller.paxos4j.config;
 
-import cn.oomkiller.paxos4j.log.LogStorage;
+import cn.oomkiller.paxos4j.log.LogStore;
 import cn.oomkiller.paxos4j.utils.RandomUtil;
+import lombok.Data;
+
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 
 @Data
 public class Config {
@@ -20,14 +21,14 @@ public class Config {
 
   private List<NodeInfo> nodeInfoList;
 
-  private boolean amIFollower;
+  private boolean follower;
   private long followToNodeId;
 
   private Map<Long, Long> mapTmpNodeOnlyForLearn;
   private Map<Long, Long> mapMyFollower;
 
   public Config(
-      LogStorage logStorage,
+      LogStore logStore,
       boolean logSync,
       int syncInterval,
       boolean useMembership,
@@ -91,7 +92,7 @@ public class Config {
   }
 
   public long getAskforLearnInterval() {
-    if (!amIFollower) {
+    if (!follower) {
       if (largeValueMode) {
         return 50000 + (RandomUtil.randomInt() % 10000);
       } else {
@@ -108,5 +109,9 @@ public class Config {
 
   public int getMajorityCount() {
     return nodeInfoList.size() / 2 + 1;
+  }
+
+  public void addFollowerNode(long nodeId) {
+
   }
 }
