@@ -16,8 +16,9 @@ public class AbstractPaxosServer {
         int cnt = 0;
         while (cnt++ < 10) {
             node.commitNewValue(("Hello" + System.currentTimeMillis()).getBytes());
-            Thread.sleep(10*1000);
+            Thread.sleep(3*1000);
         }
+        node.stopNode();
     }
 
   public static void main(String[] args) throws IOException, InterruptedException {

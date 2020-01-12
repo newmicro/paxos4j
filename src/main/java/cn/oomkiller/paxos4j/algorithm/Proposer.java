@@ -195,7 +195,7 @@ public class Proposer extends Base {
     if (msgCounter.isPassedOnThisRound()) {
       exitAccept();
       log.info("Value Accepted!!!");
-      //      learner.proposerSendSuccess(getInstanceId(), proposerState.getProposalId());
+      learner.proposerSendSuccess(getInstanceId(), proposerState.getProposalId());
     } else if (msgCounter.isRejectedOnThisRound() || msgCounter.isAllReceiveOnThisRound()) {
       addAcceptTimer(RandomUtil.randomInt(30) + 10);
     }

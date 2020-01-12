@@ -9,8 +9,9 @@ import cn.oomkiller.paxos4j.statemachine.StateMachine;
 import cn.oomkiller.paxos4j.statemachine.StateMachineContext;
 import cn.oomkiller.paxos4j.statemachine.StateMachineManager;
 import cn.oomkiller.paxos4j.transport.MsgTransport;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
 
 @Slf4j
 public class Instance {
@@ -196,7 +197,10 @@ public class Instance {
     }
   }
 
-  private void receiveMsgForLearner(PaxosMsg oPaxosMsg) {}
+  private void receiveMsgForLearner(PaxosMsg oPaxosMsg) {
+    newInstance();
+    log.info("Start new instance");
+  }
 
   public void commitNewValue(byte[] value) {
     proposer.propose(value);
