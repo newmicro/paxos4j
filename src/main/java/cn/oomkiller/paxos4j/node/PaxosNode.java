@@ -3,7 +3,7 @@ package cn.oomkiller.paxos4j.node;
 import cn.oomkiller.paxos4j.algorithm.Instance;
 import cn.oomkiller.paxos4j.config.Config;
 import cn.oomkiller.paxos4j.config.Options;
-import cn.oomkiller.paxos4j.log.FileLogStore;
+import cn.oomkiller.paxos4j.log.fs.FilesystemLogStore;
 import cn.oomkiller.paxos4j.log.LogStore;
 import cn.oomkiller.paxos4j.transport.Communicate;
 import cn.oomkiller.paxos4j.transport.DefaultMessageHandler;
@@ -41,6 +41,7 @@ public class PaxosNode implements Node {
 
   @Override
   public void stopNode() {
+    logStore.close();
     //    //1.step: must stop master(app) first.
     //    for (auto & poMaster : m_vecMasterList)
     //    {
@@ -160,7 +161,7 @@ public class PaxosNode implements Node {
 
   private void initLogStorage(Options options) {
     if (options.getLogStore() != null) {
-      this.logStore = options.getLogStore();
+      logStore = options.getLogStore();
       log.info("OK, use user logstorage");
       return;
     }
@@ -170,7 +171,8 @@ public class PaxosNode implements Node {
       throw new IllegalArgumentException();
     }
 
-    this.logStore = new FileLogStore(options.getLogStoragePath());
+    logStore = new FilesystemLogStore();
+    logStore.open(options.getLogStoragePath());
     //    .init(options.getLogStoragePath(), options.getGroupCount());
     log.info("OK, use default logstorage");
   }

@@ -1,8 +1,9 @@
 package cn.oomkiller.paxos4j.log;
 
 import cn.oomkiller.paxos4j.algorithm.Acceptor;
-import java.io.IOException;
 import lombok.AllArgsConstructor;
+
+import java.io.IOException;
 
 @AllArgsConstructor
 public class PaxosLog {

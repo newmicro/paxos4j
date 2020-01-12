@@ -8,8 +8,6 @@ public interface LogStore {
 
     void put(long instanceId, byte[] value, boolean isSync);
 
-    void delete(long instanceId);
-
     long getMaxInstanceId();
 
     void setMinChosenInstanceId(long minInstanceId);
@@ -17,4 +15,8 @@ public interface LogStore {
     long getMinChosenInstanceId();
 
     void clearAllLog();
+
+    void open(String logStoragePath);
+
+    void close();
 }

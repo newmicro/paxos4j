@@ -10,5 +10,5 @@ myIp: 127.0.0.1
 myPort: 3333
 logSync: true
 syncInterval: 1000
-logStoragePath: C:\\paxos\\paxos_3333.log
+logStoragePath: C:\\paxos\\3333
 useMembership: false

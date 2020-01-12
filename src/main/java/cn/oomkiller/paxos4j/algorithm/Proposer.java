@@ -194,7 +194,8 @@ public class Proposer extends Base {
 
     if (msgCounter.isPassedOnThisRound()) {
       exitAccept();
-      learner.proposerSendSuccess(getInstanceId(), proposerState.getProposalId());
+      log.info("Value Accepted!!!");
+      //      learner.proposerSendSuccess(getInstanceId(), proposerState.getProposalId());
     } else if (msgCounter.isRejectedOnThisRound() || msgCounter.isAllReceiveOnThisRound()) {
       addAcceptTimer(RandomUtil.randomInt(30) + 10);
     }
@@ -238,26 +239,11 @@ public class Proposer extends Base {
   }
 
   private void addPrepareTimer(final long timeoutMs) {
-    lastPrepareTimeoutMs =
-        addTimer(acceptTimerTask, timeoutMs, lastPrepareTimeoutMs, config.getMaxPrepareTimeoutMs());
-  }
-
-  private void addAcceptTimer() {
-    addAcceptTimer(0);
-  }
-
-  private void addAcceptTimer(long timeoutMs) {
-    lastAcceptTimeoutMs =
-        addTimer(acceptTimerTask, timeoutMs, lastAcceptTimeoutMs, config.getMaxAcceptTimeoutMs());
-  }
-
-  private long addTimer(
-      TimerTask timerTask, long timeoutMs, long lastTimeoutMs, long maxTimeoutMs) {
-    if (timerTask != null) {
-      timerTask.cancel();
+    if (prepareTimerTask != null) {
+      prepareTimerTask.cancel();
     }
 
-    timerTask =
+    prepareTimerTask =
         new TimerTask() {
           @Override
           public void run() {
@@ -266,17 +252,46 @@ public class Proposer extends Base {
         };
 
     if (timeoutMs > 0) {
-      timer.schedule(timerTask, timeoutMs);
+      timer.schedule(prepareTimerTask, timeoutMs);
+      return;
     }
 
-    timer.schedule(timerTask, lastTimeoutMs);
+    timer.schedule(prepareTimerTask, lastPrepareTimeoutMs);
     timeoutInstanceId = getInstanceId();
-
-    lastTimeoutMs *= 2;
-    if (lastTimeoutMs > maxTimeoutMs) {
-      lastTimeoutMs = maxTimeoutMs;
+    lastPrepareTimeoutMs *= 2;
+    if (lastPrepareTimeoutMs > config.getMaxPrepareTimeoutMs()) {
+      lastPrepareTimeoutMs = config.getMaxPrepareTimeoutMs();
     }
-    return lastTimeoutMs;
+  }
+
+  private void addAcceptTimer() {
+    addAcceptTimer(0);
+  }
+
+  private void addAcceptTimer(long timeoutMs) {
+    if (acceptTimerTask != null) {
+      acceptTimerTask.cancel();
+    }
+
+    acceptTimerTask =
+        new TimerTask() {
+          @Override
+          public void run() {
+            onPrepareOrAcceptTimeout();
+          }
+        };
+
+    if (timeoutMs > 0) {
+      timer.schedule(acceptTimerTask, timeoutMs);
+      return;
+    }
+
+    timer.schedule(acceptTimerTask, lastAcceptTimeoutMs);
+    timeoutInstanceId = getInstanceId();
+    lastAcceptTimeoutMs *= 2;
+    if (lastAcceptTimeoutMs > config.getMaxAcceptTimeoutMs()) {
+      lastAcceptTimeoutMs = config.getMaxAcceptTimeoutMs();
+    }
   }
 
   private void exitPrepare() {

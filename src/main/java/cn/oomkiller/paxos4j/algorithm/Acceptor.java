@@ -6,17 +6,12 @@ import cn.oomkiller.paxos4j.log.PaxosLog;
 import cn.oomkiller.paxos4j.message.PaxosMsg;
 import cn.oomkiller.paxos4j.message.PaxosMsgType;
 import cn.oomkiller.paxos4j.transport.MsgTransport;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.*;
+
+import static cn.oomkiller.paxos4j.utils.Constant.IDS_DATA_LENGTH;
 
 @Slf4j
 public class Acceptor extends Base {
@@ -179,17 +174,18 @@ public class Acceptor extends Base {
   @Data
   @Builder
   @NoArgsConstructor
+  @AllArgsConstructor
   public static class StateData {
-    long instanceId;
-    long promiseId;
-    long promiseNodeId;
-    long acceptedId;
-    long acceptedNodeId;
-    byte[] acceptedValue;
+    private long instanceId;
+    private long promiseId;
+    private long promiseNodeId;
+    private long acceptedId;
+    private long acceptedNodeId;
+    private byte[] acceptedValue;
 
     private int size() {
       if (acceptedValue != null) {
-        return acceptedValue.length + 20;
+        return acceptedValue.length + IDS_DATA_LENGTH;
       }
       return 0;
     }
@@ -199,7 +195,7 @@ public class Acceptor extends Base {
     }
 
     public StateData parseFromBytes(byte[] bytes, int offset, int length) throws IOException {
-//      return JsonUtil.fromJson(new String(bytes, offset, length), StateData.class);
+      //      return JsonUtil.fromJson(new String(bytes, offset, length), StateData.class);
       try (ByteArrayInputStream buffer = new ByteArrayInputStream(bytes, offset, length);
           DataInputStream in = new DataInputStream(buffer)) {
         instanceId = in.readLong();
@@ -207,8 +203,10 @@ public class Acceptor extends Base {
         promiseNodeId = in.readLong();
         acceptedId = in.readLong();
         acceptedNodeId = in.readLong();
-        acceptedValue = new byte[length - 20];
-        in.readFully(acceptedValue);
+        if (length > IDS_DATA_LENGTH) {
+          acceptedValue = new byte[length - IDS_DATA_LENGTH];
+          in.readFully(acceptedValue);
+        }
         return this;
       }
     }
@@ -221,7 +219,9 @@ public class Acceptor extends Base {
         out.writeLong(promiseNodeId);
         out.writeLong(acceptedId);
         out.writeLong(acceptedNodeId);
-        out.write(acceptedValue);
+        if (acceptedValue != null && acceptedValue.length > 0) {
+          out.write(acceptedValue);
+        }
         return buffer.toByteArray();
       }
     }
