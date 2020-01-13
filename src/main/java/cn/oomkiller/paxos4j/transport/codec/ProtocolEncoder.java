@@ -14,7 +14,7 @@ public class ProtocolEncoder extends MessageToMessageEncoder<Message> {
     protected void encode(ChannelHandlerContext ctx, Message msg, List<Object> out) throws Exception {
         ByteBuf buf = ctx.alloc().buffer();
         msg.encode(buf);
-        log.info("Encode Message " + msg);
+//        log.info("Encode Message " + msg);
 
         out.add(buf);
     }

@@ -12,7 +12,7 @@ import java.util.List;
 public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
-        log.info("Message decoder");
+//        log.info("Message decoder");
         Message message = new Message();
         message.decode(buf);
 

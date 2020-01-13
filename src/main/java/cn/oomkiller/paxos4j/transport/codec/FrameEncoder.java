@@ -7,6 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 public class FrameEncoder extends LengthFieldPrepender {
     public FrameEncoder() {
         super(2);
-        log.info("Frame Encoder");
+//        log.info("Frame Encoder");
     }
 }

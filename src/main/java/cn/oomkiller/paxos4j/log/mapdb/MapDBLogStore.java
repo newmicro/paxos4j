@@ -1,26 +1,25 @@
 package cn.oomkiller.paxos4j.log.mapdb;
 
 import cn.oomkiller.paxos4j.log.LogStore;
-import cn.oomkiller.paxos4j.log.fs.LogDataFile;
-import cn.oomkiller.paxos4j.log.fs.LogIndexFile;
-import cn.oomkiller.paxos4j.log.fs.MemoryIndex;
 import cn.oomkiller.paxos4j.utils.Constant;
 import cn.oomkiller.paxos4j.utils.DataUtil;
-import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
 import lombok.extern.slf4j.Slf4j;
+import org.mapdb.BTreeMap;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.Serializer;
+
+import java.util.Map;
 
 @Slf4j
 public class MapDBLogStore implements LogStore {
   private static final int THREAD_NUM = 1;
   // partition num
   private final int groupNum = Constant.GROUP_NUM;
-  // key -> partition
-  //  private volatile Partitionable partitionable;
   // data
-  public volatile LogDataFile[] logDataFiles;
+  public volatile DB[] databases;
   // index
-  private volatile LogIndexFile[] logIndexFiles;
+  private volatile BTreeMap<byte[], byte[]>[] bTreeMaps;
   // true means need to load index into memory, false means no need
   private volatile boolean needLoad = false;
   private String logStoragePath;
@@ -34,19 +33,26 @@ public class MapDBLogStore implements LogStore {
 
   @Override
   public byte[] get(long instanceId) {
-    return read(DataUtil.longToBytes(instanceId));
+    int partition = 0;
+    return bTreeMaps[partition].get(DataUtil.longToBytes(instanceId));
   }
 
   @Override
   public void put(long instanceId, byte[] value, boolean isSync) {
-    write(DataUtil.longToBytes(instanceId), value);
+    int partition = 0;
+    bTreeMaps[partition].put(DataUtil.longToBytes(instanceId), value);
+    log.info("btree map size" + bTreeMaps[partition].size());
   }
 
   @Override
   public long getMaxInstanceId() {
     int partition = 0;
-    MemoryIndex hitMemoryIndex = logIndexFiles[partition].getMemoryIndex();
-    return hitMemoryIndex.getKeys()[hitMemoryIndex.getSize() - 1];
+    log.info("btree map size" + bTreeMaps[partition].size());
+    if (bTreeMaps[partition].size() == 0) {
+      return 0L;
+    }
+    byte[] bytes = bTreeMaps[partition].lastKey();
+    return DataUtil.bytesToLong(bytes);
   }
 
   @Override
@@ -58,7 +64,11 @@ public class MapDBLogStore implements LogStore {
   }
 
   @Override
-  public void clearAllLog() {}
+  public void clearAllLog() {
+    for (BTreeMap map : bTreeMaps) {
+      map.clear();
+    }
+  }
 
   @Override
   public void open(String logStoragePath) {
@@ -66,101 +76,30 @@ public class MapDBLogStore implements LogStore {
       logStoragePath = logStoragePath.substring(0, logStoragePath.length() - 1);
     }
     this.logStoragePath = logStoragePath;
-    logDataFiles = new LogDataFile[groupNum];
-    logIndexFiles = new LogIndexFile[groupNum];
-    try {
-      for (int i = 0; i < groupNum; i++) {
-        logDataFiles[i] = new LogDataFile();
-        logDataFiles[i].init(logStoragePath, i);
-      }
-      for (int i = 0; i < groupNum; i++) {
-        logIndexFiles[i] = new LogIndexFile();
-        logIndexFiles[i].init(logStoragePath, i);
-        logIndexFiles[i].setLogDataFile(logDataFiles[i]);
-        needLoad = needLoad || (!logIndexFiles[i].isLoaded());
-      }
-      //      if (needLoad) {
-      loadAllIndex();
-      //      }
-    } catch (IOException e) {
-      throw new RuntimeException("open exception");
+    databases = new DB[groupNum];
+    bTreeMaps = new BTreeMap[groupNum];
+
+    for (int i = 0; i < groupNum; i++) {
+      String dbFile = logStoragePath + Constant.DATA_PREFIX + i + Constant.DATA_SUFFIX;
+      databases[i] = DBMaker.fileDB(dbFile).transactionEnable().make();
+      Map map = databases[i].hashMap("map" + i).createOrOpen();
+    }
+    for (int i = 0; i < groupNum; i++) {
+      bTreeMaps[i] =
+          databases[i]
+              .treeMap("treemap" + i)
+              .keySerializer(Serializer.BYTE_ARRAY)
+              .valueSerializer(Serializer.BYTE_ARRAY)
+              .createOrOpen();
     }
   }
 
   @Override
   public void close() {
-    if (logDataFiles != null) {
-      for (LogDataFile dataFile : logDataFiles) {
-        try {
-          dataFile.destroy();
-        } catch (IOException e) {
-          log.error("data destroy error", e);
-        }
+    if (databases != null) {
+      for (DB db : databases) {
+        db.close();
       }
     }
-    if (logIndexFiles != null) {
-      for (LogIndexFile indexFile : logIndexFiles) {
-        try {
-          indexFile.destroy();
-        } catch (IOException e) {
-          log.error("data destroy error", e);
-        }
-      }
-    }
-  }
-
-  private byte[] read(byte[] key) {
-    int partition = 0; // partitionable.getPartition(key);
-    LogDataFile hitDataFile = logDataFiles[partition];
-    LogIndexFile hitIndexFile = logIndexFiles[partition];
-    long offset = hitIndexFile.read(key);
-    if (offset < 0) {
-      return null;
-      //      throw new EngineException(RetCodeEnum.NOT_FOUND, Util.bytes2Long(key) + " not found");
-    }
-    try {
-      return hitDataFile.read(offset);
-    } catch (IOException e) {
-      return null;
-      //      throw new EngineException(RetCodeEnum.IO_ERROR, "commit log read exception");
-    }
-  }
-
-  private void write(byte[] key, byte[] value) {
-    int partition = 0; // partitionable.getPartition(key);
-    LogDataFile hitDataFile = logDataFiles[partition];
-    LogIndexFile hitIndexFile = logIndexFiles[partition];
-    synchronized (hitDataFile) {
-      long offset = hitDataFile.write(value);
-      hitIndexFile.write(key, offset);
-    }
-  }
-
-  private void loadAllIndex() {
-    int loadThreadNum = THREAD_NUM;
-    CountDownLatch countDownLatch = new CountDownLatch(loadThreadNum);
-    for (int i = 0; i < loadThreadNum; i++) {
-      final int index = i;
-      new Thread(
-              () -> {
-                for (int partition = 0; partition < groupNum; partition++) {
-                  if (partition % loadThreadNum == index) {
-                    try {
-                      logIndexFiles[partition].load();
-                    } catch (IOException e) {
-                      log.error("Failed load index file #" + partition, e);
-                    }
-                  }
-                }
-                countDownLatch.countDown();
-              })
-          .start();
-    }
-    try {
-      countDownLatch.await();
-    } catch (InterruptedException e) {
-      log.error("load index interrupted", e);
-    }
-    needLoad = false;
   }
 }

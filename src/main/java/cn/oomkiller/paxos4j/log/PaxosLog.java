@@ -29,7 +29,7 @@ public class PaxosLog {
   }
 
   public long getMaxInstanceIdFromLog() {
-    return 0L;
+    return logStore.getMaxInstanceId();
   }
 
   public void writeState(long instanceId, Acceptor.StateData state, boolean isSync)

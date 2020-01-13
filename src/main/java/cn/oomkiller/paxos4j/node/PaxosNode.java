@@ -3,8 +3,8 @@ package cn.oomkiller.paxos4j.node;
 import cn.oomkiller.paxos4j.algorithm.Instance;
 import cn.oomkiller.paxos4j.config.Config;
 import cn.oomkiller.paxos4j.config.Options;
-import cn.oomkiller.paxos4j.log.fs.FilesystemLogStore;
 import cn.oomkiller.paxos4j.log.LogStore;
+import cn.oomkiller.paxos4j.log.mapdb.MapDBLogStore;
 import cn.oomkiller.paxos4j.transport.Communicate;
 import cn.oomkiller.paxos4j.transport.DefaultMessageHandler;
 import cn.oomkiller.paxos4j.transport.MsgTransport;
@@ -171,7 +171,7 @@ public class PaxosNode implements Node {
       throw new IllegalArgumentException();
     }
 
-    logStore = new FilesystemLogStore();
+    logStore = new MapDBLogStore();
     logStore.open(options.getLogStoragePath());
     //    .init(options.getLogStoragePath(), options.getGroupCount());
     log.info("OK, use default logstorage");
