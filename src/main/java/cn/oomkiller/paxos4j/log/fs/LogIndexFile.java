@@ -55,9 +55,16 @@ public class LogIndexFile implements LogDataAware {
     }
 
     fileChannel = new RandomAccessFile(indexFile, "rw").getChannel();
+    if (loaded) {
+      memoryIndex = new ArrayMemoryIndex();
+    }
   }
 
   public void load() throws IOException {
+    if (loaded) {
+      return;
+    }
+
     int indexSize = getIndexSize();
     memoryIndex = new ArrayMemoryIndex(indexSize);
     if (indexSize == 0) {

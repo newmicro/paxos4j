@@ -9,6 +9,10 @@ public class UdpSender extends Thread {
     private boolean isStarted;
     private List<QueueData> sendQueue;
 
+    public UdpSender() {
+        super("UdpSender");
+    }
+
     void addMessage(SocketAddress destination, byte[] message) {
 
     }

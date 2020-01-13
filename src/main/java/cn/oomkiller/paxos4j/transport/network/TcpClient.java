@@ -17,18 +17,18 @@ import java.net.SocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@NoArgsConstructor
 public class TcpClient extends Thread {
   private final Bootstrap bootstrap = new Bootstrap();
-  private boolean isEnd;
+  private volatile boolean isEnd;
   private ConcurrentMap<SocketAddress, Channel> clientMap = new ConcurrentHashMap<>();
   private LinkedBlockingQueue<RoutedMessage> messageQueue = new LinkedBlockingQueue();
 
-  public TcpClient(int ioThreadCount) {}
+  public TcpClient() {
+    super("TcpClient");
+  }
 
   @Override
   public void run() {
@@ -102,6 +102,7 @@ public class TcpClient extends Thread {
   public void end() {
     isEnd = true;
     try {
+      interrupt();
       join();
     } catch (InterruptedException e) {
       e.printStackTrace();

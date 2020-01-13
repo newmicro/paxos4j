@@ -8,7 +8,7 @@ public class UdpReceiver  extends Thread {
     private MessageHandler handler;
 
     public UdpReceiver(final int port) {
-
+        super("UdpReceiver");
     }
 
     public void setMessageHandler(MessageHandler handler) {

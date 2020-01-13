@@ -23,6 +23,7 @@ public class DefaultNetwork implements Network {
 
   @Override
   public void runNetwork() {
+
     tcpServer.start();
     tcpClient.start();
     udpReceiver.start();

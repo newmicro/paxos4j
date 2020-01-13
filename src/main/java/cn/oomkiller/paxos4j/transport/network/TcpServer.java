@@ -21,9 +21,10 @@ public class TcpServer extends Thread {
 
   private final ServerBootstrap serverBootstrap = new ServerBootstrap();
   private MessageHandler messageHandler;
-  private boolean isEnd;
+  private volatile boolean isEnd;
 
   public TcpServer(String ip, int port, int ioThreadCount) {
+    super("TcpServer");
     this.ip = ip;
     this.port = port;
   }
@@ -82,6 +83,7 @@ public class TcpServer extends Thread {
   public void end() {
     isEnd = true;
     try {
+      interrupt();
       join();
     } catch (InterruptedException e) {
       e.printStackTrace();
